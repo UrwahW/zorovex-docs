@@ -1,13 +1,34 @@
-# Tech Stack
+Backend
+- Ruby on Rails 8
 
-> Status: Draft
+Frontend
+- React
+- Vite
+- TypeScript
 
-Languages, frameworks, services, and infrastructure choices.
+Database
+- PostgreSQL
 
-## Overview
+Cache
+- Redis
 
-_TBD_
+Queue
+- Sidekiq (or Solid Queue after evaluation)
 
-## Related Docs
+Storage
+- MinIO
 
-_TBD_
+AI
+- Claude
+
+Workflow
+- n8n
+
+Mobile
+- React Native
+
+Deployment
+- Docker Compose
+
+Reverse Proxy
+- Traefik

@@ -1,84 +1,209 @@
 # AGENT ARCHITECTURE
 
-**Version:** 1.0
+Version: 2.0
 
-**Status:** Approved
+Status: Approved
 
-**Owner:** Platform Architecture
+Owner: Platform Architecture
+
+Related Documents:
+- AI_RUNTIME.md
+- KNOWLEDGE.md
+- TOOL_CALLING.md
+- BUSINESS_READINESS.md
+- SYSTEM_ARCHITECTURE.md
 
 ---
 
 # Purpose
 
-An AI Agent is an intelligent software entity responsible for performing one or more business functions on behalf of an organization.
+This document defines the architecture, responsibilities, lifecycle, and engineering standards for every AI Agent within the Zorovex platform.
 
-Every AI capability inside Zorovex must be implemented as an AI Agent.
+An AI Agent is **not** a Large Language Model (LLM).
 
-This architecture ensures all present and future AI capabilities follow a consistent design.
+An AI Agent is a configurable digital employee that performs business responsibilities through the AI Runtime.
+
+Every AI capability introduced into Zorovex must conform to this architecture.
 
 ---
 
 # Vision
 
-The AI Platform should support multiple specialized agents instead of one large assistant.
+Zorovex is designed as a multi-agent business operating platform rather than a single AI assistant.
 
-Each agent has a clearly defined purpose, responsibilities and permissions.
+Each AI Agent owns a specific business role and collaborates through the AI Runtime while remaining independently configurable, observable, secure, and replaceable.
 
-Agents collaborate through the AI Runtime while remaining independently configurable.
+Examples include:
+
+- Receptionist
+- Voice Agent
+- Sales Consultant
+- Marketing Assistant
+- Customer Support
+- Internal Staff Assistant
+- Future Custom Agents
+
+The AI Runtime coordinates all collaboration between agents.
+
+Agents never communicate directly.
 
 ---
 
-# Design Principles
+# Scope
+
+This document defines:
+
+- Agent architecture
+- Agent lifecycle
+- Responsibilities
+- Capabilities
+- Permissions
+- Runtime interaction
+- Configuration
+- Security model
+
+This document does **not** define:
+
+- Prompt compilation
+- Runtime orchestration
+- Knowledge retrieval
+- Tool implementation
+- LLM providers
+- Conversation memory
+
+Those are documented separately.
+
+---
+
+# Core Principles
 
 Every AI Agent must be:
 
-- Modular
-- Configurable
+- Business Driven
+- Deterministic
+- Explainable
 - Observable
+- Configurable
 - Secure
+- Tenant Isolated
 - Replaceable
 - Provider Agnostic
-- Business Driven
+
+Business logic must never live inside an agent.
+
+---
+
+# Runtime Relationship
+
+An AI Agent never communicates directly with:
+
+- Customers
+- LLM Providers
+- Workflows
+- Tools
+- External APIs
+
+All execution flows through the AI Runtime.
+
+Customer
+
+↓
+
+Communication Channel
+
+↓
+
+AI Runtime
+
+↓
+
+AI Agent
+
+↓
+
+Business Rules
+
+↓
+
+Knowledge
+
+↓
+
+Workflow
+
+↓
+
+Provider
+
+↓
+
+Customer
+
+The Runtime owns orchestration.
+
+The Agent owns business behaviour.
 
 ---
 
 # Agent Lifecycle
 
-Every agent follows the same lifecycle.
+Every AI Agent follows the same lifecycle.
 
-```
 Created
-    │
+
+↓
+
 Configured
-    │
+
+↓
+
 Validated
-    │
+
+↓
+
 Enabled
-    │
+
+↓
+
 Serving Requests
-    │
+
+↓
+
 Disabled
-    │
+
+↓
+
 Archived
-```
+
+Archived agents remain auditable and are never permanently deleted.
 
 ---
 
 # AI Agent Model
 
-Every AI Agent contains:
+Every AI Agent contains the following components.
+
+---
 
 ## Identity
 
 Defines who the agent is.
 
-Examples
+Examples:
 
 - Receptionist
+- Sales Consultant
 - Voice Agent
-- Sales Agent
 - Marketing Assistant
-- Support Agent
+- Customer Support
+
+Identity includes:
+
+- Name
+- Description
+- Department
+- Avatar
+- Visibility
 
 ---
 
@@ -86,183 +211,93 @@ Examples
 
 Defines why the agent exists.
 
-Examples
+Examples:
 
 Receptionist
 
-Answer questions and book appointments.
+- Answer questions
+- Book appointments
+- Guide customers
 
 Sales Agent
 
-Increase conversions.
+- Increase revenue
+- Recommend packages
+- Capture leads
 
 Support Agent
 
-Resolve customer issues.
+- Resolve issues
+- Escalate complaints
 
----
+Purpose is descriptive only.
 
-## Capabilities
-
-Capabilities define what an agent may perform.
-
-Examples
-
-Answer Questions
-
-Search Knowledge
-
-Create Booking
-
-Recommend Services
-
-Collect Leads
-
-Transfer Conversation
-
-Execute CRM Actions
-
-Capabilities are additive.
-
----
-
-## Knowledge Sources
-
-Each agent explicitly selects the information it may use.
-
-Possible sources include:
-
-Business Brain
-
-Business Profile
-
-Services
-
-Staff
-
-Business Hours
-
-Customers
-
-Bookings
-
-Promotions
-
-Policies
-
-Future External Sources
+It does not execute business logic.
 
 ---
 
 ## Behaviour
 
-Behaviour controls how the agent communicates.
+Behaviour controls communication style.
 
-Examples
+Examples:
 
-Professional
+- Professional
+- Luxury
+- Friendly
+- Medical
+- Corporate
+- Educational
 
-Friendly
+Behaviour affects wording only.
 
-Luxury
-
-Medical
-
-Corporate
-
-Educational
-
-Behaviour is configured in AI Studio.
+Behaviour never changes business decisions.
 
 ---
 
 ## Goals
 
-Every agent has one or more measurable goals.
+Goals define desired outcomes.
 
-Examples
+Examples:
 
-Increase bookings
+- Book Appointment
+- Recommend Service
+- Upsell Package
+- Capture Lead
+- Escalate Conversation
+- Answer Questions
 
-Generate leads
+Goals are resolved by the Runtime.
 
-Reduce unanswered questions
-
-Increase package sales
-
-Promote memberships
-
----
-
-## Escalation Rules
-
-Agents define situations requiring human intervention.
-
-Examples
-
-Refund requests
-
-Complaints
-
-Low confidence
-
-Payment issues
-
-Legal topics
-
-Emergency situations
+Agents never invent goals.
 
 ---
 
-## Communication Channels
+## Capabilities
 
-Agents operate only on approved communication channels.
+Capabilities define **what the agent is allowed to accomplish**.
 
-Examples
+Examples:
 
-Website Chat
+- Answer Questions
+- Search Knowledge
+- Recommend Services
+- Create Booking
+- Capture Leads
+- Escalate Conversation
 
-WhatsApp
+Capabilities are business concepts.
 
-Voice
-
-Instagram
-
-Facebook
-
-Email
-
-SMS
-
----
-
-## Permissions
-
-Agents may only execute approved platform actions.
-
-Examples
-
-Read Services
-
-Read Business Brain
-
-Create Booking
-
-Update Booking
-
-Read Customer
-
-Never grant unrestricted access.
-
-Every permission must be explicit.
+They are independent from implementation.
 
 ---
 
 ## Tools
 
-Agents use tools provided by the AI Runtime.
+Tools define **how a capability is technically performed**.
 
-Examples
+Examples:
 
 Booking Tool
 
@@ -272,194 +307,331 @@ Customer Lookup
 
 Promotion Lookup
 
-Staff Lookup
+CRM Tool
 
-Future tools can be added without modifying existing agents.
+Capabilities may use multiple tools.
+
+Multiple capabilities may share one tool.
+
+Agents request tools through the AI Runtime.
+
+Agents never execute tools directly.
 
 ---
 
-## Memory
+## Knowledge Sources
 
-Version 1
+Agents explicitly declare which knowledge they may access.
 
-Stateless.
+Examples:
 
-Future versions introduce:
+- Business Profile
+- Services
+- Categories
+- Packages
+- Promotions
+- Pricing Rules
+- Staff
+- Policies
+- FAQs
+- Business Notes
+- Customer Context
 
-Conversation Memory
+Knowledge permissions are explicit.
 
-Long-term Memory
+No agent automatically receives all business data.
 
-Customer Memory
+---
 
-Business Memory
+## Permissions
+
+Permissions control operational authority.
+
+Examples:
+
+- Read Services
+- Read Customers
+- Read Availability
+- Create Booking
+- Update Booking
+- Escalate Conversation
+
+Permissions never imply unrestricted access.
+
+Every permission is explicitly granted.
+
+---
+
+## Communication Channels
+
+Agents operate only on configured channels.
+
+Examples:
+
+- Website Chat
+- WhatsApp
+- Instagram
+- Facebook
+- Voice
+- Email
+- SMS
+
+Future channels may be added without changing agent architecture.
+
+---
+
+## Escalation Rules
+
+Agents define when human assistance is required.
+
+Typical triggers include:
+
+- Complaints
+- Refunds
+- Low Confidence
+- Payment Issues
+- Human Request
+- Legal Topics
+- Emergency Situations
+
+The Runtime performs the escalation.
+
+The agent only declares the rules.
+
+---
+
+## Configuration
+
+Every agent exposes configurable runtime settings.
+
+Examples:
+
+- Greeting
+- Tone
+- Language
+- Temperature
+- Creativity
+- Maximum Tokens
+- Working Hours
+- Allowed Channels
+- Provider Overrides
+- Escalation Threshold
+- Enabled Knowledge Sources
+- Enabled Goals
+
+Configuration is managed through AI Studio.
+
+---
+
+## State
+
+Version 1 agents are stateless.
+
+Execution state exists only during a runtime execution.
+
+Future versions may introduce:
+
+- Conversation Memory
+- Customer Memory
+- Business Memory
+- Shared Agent State
+
+Persistent state is managed by the Runtime rather than the agent.
 
 ---
 
 ## Monitoring
 
-Every agent should eventually expose:
+Every agent should expose operational metrics.
 
-Requests
+Examples:
 
-Response Time
+- Requests
+- Average Response Time
+- Provider Usage
+- Token Usage
+- Confidence
+- Escalations
+- Failures
+- Successful Tasks
+- Booking Conversion
+- Lead Conversion
 
-Token Usage
+---
 
-Provider
+## Evaluation
 
-Confidence
+Agents are continuously evaluated.
 
-Escalations
+Metrics include:
 
-Failures
+- Intent Accuracy
+- Knowledge Coverage
+- Escalation Rate
+- Resolution Rate
+- Booking Conversion
+- Customer Satisfaction
+- Average Confidence
 
-Successful Tasks
+Evaluation informs human operators.
 
-Business Metrics
+Evaluation never automatically changes agent behaviour.
 
 ---
 
 # Agent Independence
 
-Agents should never directly communicate with each other.
+Agents never communicate directly with one another.
 
-All collaboration occurs through the AI Runtime.
+All collaboration is coordinated by the AI Runtime.
 
-This prevents tight coupling.
+Example:
 
----
+Customer
 
-# Agent Types
+↓
 
-## Receptionist
+Receptionist
 
-Primary Goal
+↓
 
-Manage customer conversations and appointments.
+Runtime
 
----
+↓
 
-## Voice Agent
+Sales Agent
 
-Primary Goal
+↓
 
-Handle telephone conversations.
+Runtime
 
----
+↓
 
-## Sales Agent
+Support Agent
 
-Primary Goal
+↓
 
-Increase revenue through recommendations and follow-ups.
+Customer
 
----
-
-## Marketing Agent
-
-Primary Goal
-
-Generate and optimize campaigns.
+This prevents tight coupling and duplicated orchestration.
 
 ---
 
-## Support Agent
+# Agent Registry
 
-Primary Goal
+Each organization owns an Agent Registry.
 
-Resolve customer issues.
+Organization
+
+↓
+
+Receptionist
+
+↓
+
+Sales
+
+↓
+
+Support
+
+↓
+
+Marketing
+
+↓
+
+Voice
+
+↓
+
+Internal Assistant
+
+↓
+
+Future Custom Agents
+
+Platform templates may provision default agents.
+
+Organizations own their configuration.
 
 ---
 
-## Internal Assistant
-
-Primary Goal
-
-Assist staff with internal tasks.
-
----
-
-## Custom Agent
-
-Organizations may eventually create their own specialized agents.
-
----
-
-# Security Principles
+# Security
 
 Agents never receive:
 
-Provider API Keys
+- Provider API Keys
+- Database Credentials
+- Platform Secrets
+- Cross-tenant Data
+- Internal Platform Configuration
 
-Database Access
-
-System Secrets
-
-Private Platform Configuration
-
-Agents receive only the context required to complete a task.
+Agents receive only the minimum context required to perform their responsibilities.
 
 ---
 
 # Scalability
 
-The architecture must support:
+The architecture supports:
 
-Single Agent Organizations
-
-Multiple Specialized Agents
-
-Concurrent Agent Execution
-
-Future Multi-Agent Workflows
+- Single Agent Organizations
+- Multiple Specialized Agents
+- Concurrent Agent Execution
+- Future Multi-Agent Collaboration
+- Provider Independence
+- New Communication Channels
 
 ---
 
-# Future Expansion
+# Future Roadmap
 
 Future agent capabilities include:
 
-Voice Streaming
-
-Workflow Automation
-
-Calendar Management
-
-Payment Collection
-
-CRM Updates
-
-Marketing Campaigns
-
-Inventory Queries
-
-Document Generation
-
-Analytics
+- Customer Memory
+- Voice Streaming
+- Realtime Conversations
+- Vision
+- OCR
+- Calendar Management
+- Payment Collection
+- Inventory Queries
+- Analytics
+- Marketplace Agents
 
 ---
 
-# Out of Scope
+# Engineering Rules
 
-This document does not define:
+Every AI implementation must follow these rules.
 
-Prompt Generation
-
-LLM Providers
-
-Tool Implementation
-
-Conversation Memory
-
-Knowledge Retrieval
-
-These are covered by separate architecture documents.
+- Never place business logic inside an agent.
+- Never allow an agent to communicate directly with an LLM provider.
+- Never bypass the AI Runtime.
+- Never bypass Runtime validation.
+- Never allow prompts to replace deterministic business rules.
+- Never grant unrestricted permissions.
+- Never duplicate orchestration outside the Runtime.
+- Agents remain declarative.
+- The AI Runtime remains authoritative.
 
 ---
 
 # Summary
 
-An AI Agent is the fundamental execution unit of the Zorovex AI Platform.
+An AI Agent is the fundamental business execution unit of the Zorovex AI Platform.
 
-Every future AI capability must inherit this architecture to ensure consistency, scalability and maintainability across the platform.
+Agents describe **what** the business employee is responsible for.
+
+The AI Runtime determines **how** those responsibilities are fulfilled.
+
+This separation ensures scalability, explainability, security, provider independence, and long-term maintainability across the entire platform.
+
+---
+
+# Revision History
+
+| Version | Date | Summary |
+|----------|------|---------|
+| 1.0 | Launch Sprint | Initial architecture |
+| 2.0 | Launch Sprint | Runtime integration, configuration model, engineering rules, evaluation, agent registry, state model |

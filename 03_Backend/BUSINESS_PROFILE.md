@@ -1,352 +1,283 @@
-# Business Profile
+# BUSINESS PROFILE
 
-> Status: Approved
+Version: 1.0
 
-The business profile stores operational identity and contact details for an organization.
+Status: Approved
 
-One organization has exactly one business profile.
-
-The profile is created when the organization is created and is completed through the Business Setup Wizard.
+Sprint: 1
 
 ---
 
 # Purpose
 
-The business profile answers:
+The Business Profile represents the public and operational identity of a business using Zorovex.
 
-- What is this business called?
-- What type of business is it?
-- How can customers contact it?
-- What timezone does it operate in?
-- Has onboarding been completed?
+Every Organization owns exactly one Business Profile in Version 1.
 
-The profile is used by:
-
-- Dashboard header and branding
-- AI context (Business Brain)
-- Customer-facing channels (WhatsApp, email, booking pages)
-- `/api/v1/me` setup progress checks
+Future versions will support multiple branches through Branch Profiles.
 
 ---
 
-# Domain Rules
+# Responsibilities
 
-- Every `organization` has exactly one `business_profile`
-- `business_profile.organization_id` is unique
-- Profile is scoped to the current organization — no cross-tenant access
-- Profile is created automatically when an organization is created
-- Profile starts incomplete until the setup wizard finishes
-- Only `owner` and `admin` roles may update the profile
-- `staff` may read the profile
-- Soft delete is not used — profile is deleted only when the organization is deleted
+The Business Profile stores information required by:
 
----
-
-# Relationship
-
-```
-Organization (1) ──── (1) BusinessProfile
-```
-
-| Entity | Relationship |
-|--------|--------------|
-| Organization | Parent. Created at registration. |
-| BusinessProfile | Child. Created immediately after organization creation. |
-| BusinessType | Reference value on profile (`business_type`). See `01_Product/BUSINESS_TYPES.md`. |
+- AI Receptionist
+- CRM
+- Booking System
+- Google Calendar
+- WhatsApp
+- Facebook
+- Instagram
+- Voice Agent
+- Marketing
+- Customer Communication
 
 ---
 
 # Database
 
-Table: `business_profiles`
+Table
 
-| Column | Type | Required | Notes |
-|--------|------|----------|-------|
-| id | UUID | yes | Primary key |
-| organization_id | UUID | yes | FK → organizations, unique |
-| display_name | string | no | Public business name |
-| legal_name | string | no | Registered legal name |
-| business_type | string | no | e.g. `salon`, `clinic`, `agency` |
-| timezone | string | no | IANA timezone, e.g. `Europe/London` |
-| email | string | no | Public contact email |
-| phone | string | no | Public contact phone |
-| website | string | no | URL |
-| address_line_1 | string | no | |
-| address_line_2 | string | no | |
-| city | string | no | |
-| state | string | no | |
-| postal_code | string | no | |
-| country | string | no | ISO 3166-1 alpha-2 |
-| logo_url | text | no | Active Storage or CDN URL |
-| setup_step | integer | yes | Current wizard step, default `0` |
-| setup_completed_at | datetime | no | Set when wizard completes |
-| created_at | datetime | yes | |
-| updated_at | datetime | yes | |
+business_profiles
 
-## Indexes
+Columns
 
-- Unique index on `organization_id`
-- Index on `business_type`
-- Index on `setup_completed_at`
+id UUID
 
-## Foreign Keys
+organization_id UUID
 
-- `organization_id` → `organizations.id` (on delete: cascade)
+business_name string
 
----
+legal_name string
 
-# Setup Status
+industry_id UUID
 
-Profile completion is derived from `setup_completed_at` and `setup_step`.
+description text
 
-| State | Condition |
-|-------|-----------|
-| `not_started` | `setup_step` = 0 and `setup_completed_at` is null |
-| `in_progress` | `setup_step` > 0 and `setup_completed_at` is null |
-| `completed` | `setup_completed_at` is present |
+phone string
 
-## Required Fields for Completion
+email string
 
-All of the following must be present before `setup_completed_at` is set:
+website string
 
-- `display_name`
-- `business_type`
-- `timezone`
-- `email` or `phone` (at least one contact method)
+logo_path string
 
-Wizard step mapping is defined in `03_Backend/BUSINESS_SETUP.md`.
+cover_image_path string
 
----
+currency string
 
-# API
+timezone string
 
-Base path: `/api/v1/business-profile`
+language string
 
-All endpoints require authentication.
+country string
 
-Organization context is resolved from the current session — never from request body.
+city string
 
-## Response Envelope
+address text
 
-Success:
+postal_code string
 
-```json
-{
-  "success": true,
-  "data": {}
-}
-```
+google_maps_url text
 
-Failure:
+facebook_url text
 
-```json
-{
-  "success": false,
-  "message": "...",
-  "errors": []
-}
-```
+instagram_url text
+
+linkedin_url text
+
+youtube_url text
+
+status integer
+
+created_at
+
+updated_at
 
 ---
 
-## GET /api/v1/business-profile
+# Associations
 
-Returns the business profile for the current organization.
+BusinessProfile
 
-**Authorization:** `owner`, `admin`, `staff`
+belongs_to Organization
 
-**Response `data`:**
-
-```json
-{
-  "id": "uuid",
-  "organization_id": "uuid",
-  "display_name": "Acme Salon",
-  "legal_name": null,
-  "business_type": "salon",
-  "timezone": "Europe/London",
-  "email": "hello@acme.com",
-  "phone": "+441234567890",
-  "website": null,
-  "address_line_1": null,
-  "address_line_2": null,
-  "city": null,
-  "state": null,
-  "postal_code": null,
-  "country": "GB",
-  "logo_url": null,
-  "setup_step": 2,
-  "setup_completed_at": null,
-  "setup_status": "in_progress",
-  "created_at": "2026-01-01T00:00:00Z",
-  "updated_at": "2026-01-01T00:00:00Z"
-}
-```
+belongs_to Industry
 
 ---
 
-## PATCH /api/v1/business-profile
+# Status
 
-Updates profile fields for the current organization.
+draft
 
-**Authorization:** `owner`, `admin`
+active
 
-**Request body** (all fields optional):
+disabled
 
-```json
-{
-  "display_name": "Acme Salon",
-  "legal_name": "Acme Salon Ltd",
-  "business_type": "salon",
-  "timezone": "Europe/London",
-  "email": "hello@acme.com",
-  "phone": "+441234567890",
-  "website": "https://acme.com",
-  "address_line_1": "1 High Street",
-  "city": "London",
-  "postal_code": "SW1A 1AA",
-  "country": "GB",
-  "setup_step": 3
-}
-```
-
-**Validation:**
-
-- `display_name` — max 255 characters
-- `business_type` — must be a supported type from `01_Product/BUSINESS_TYPES.md`
-- `timezone` — must be a valid IANA timezone
-- `email` — valid email format
-- `phone` — E.164 or normalized local format
-- `website` — valid URL
-- `country` — valid ISO 3166-1 alpha-2 code
-- `setup_step` — integer ≥ 0
-
-**Behavior:**
-
-- Partial updates allowed
-- Setting `setup_step` does not auto-complete the profile
-- `setup_completed_at` is set only by the setup completion command (see `03_Backend/BUSINESS_SETUP.md`)
+archived
 
 ---
 
-## POST /api/v1/business-profile/complete
+# Business Rules
 
-Marks the business profile setup as complete.
+Each Organization has exactly one Business Profile.
 
-**Authorization:** `owner`, `admin`
+Business Name is required.
 
-**Validation:**
+Industry is required.
 
-- All required completion fields must be present
-- Returns 422 with field errors if incomplete
+Timezone is required.
 
-**Response `data`:**
+Currency is required.
 
-```json
-{
-  "setup_status": "completed",
-  "setup_completed_at": "2026-01-01T00:00:00Z"
-}
-```
+Country is required.
+
+Logo is optional.
+
+Cover image is optional.
 
 ---
 
-# Integration with /api/v1/me
+# Validation
 
-`GET /api/v1/me` includes business profile summary fields:
+Business Name
 
-```json
-{
-  "business_name": "Acme Salon",
-  "business_setup_progress": {
-    "setup_status": "in_progress",
-    "setup_step": 2,
-    "setup_completed_at": null
-  }
-}
-```
+Minimum 2 characters
 
-`business_name` maps to `business_profiles.display_name`.
+Maximum 150 characters
 
-See `03_Backend/AUTHENTICATION.md`.
+Website
+
+Must be valid URL
+
+Email
+
+Valid email
+
+Phone
+
+International format
+
+Country
+
+ISO Country Code
+
+Currency
+
+ISO Currency Code
+
+Timezone
+
+IANA Timezone
 
 ---
 
-# Application Layer
+# File Uploads
 
-Follow modular monolith conventions from `09_Cursor/Cursor_Rules.md`.
+Support:
 
-| Layer | Responsibility |
-|-------|----------------|
-| Controller | `Api::V1::BusinessProfileController` — auth, params, response |
-| Command | `BusinessProfiles::UpdateCommand` |
-| Command | `BusinessProfiles::CompleteSetupCommand` |
-| Query | `BusinessProfiles::FindByOrganizationQuery` |
-| Service | `BusinessProfiles::SetupStatusService` |
-| Serializer | `BusinessProfileSerializer` |
-| Policy | `BusinessProfilePolicy` |
+Logo
 
-Controllers must not contain business logic.
+PNG
+
+JPEG
+
+SVG
+
+Maximum 5 MB
+
+Cover Image
+
+PNG
+
+JPEG
+
+Maximum 10 MB
+
+Files stored using Active Storage.
+
+---
+
+# Audit
+
+Every update creates an Audit Log.
+
+Store:
+
+User
+
+Timestamp
+
+Changed Fields
+
+Previous Values
+
+New Values
 
 ---
 
 # Events
 
-Emit domain events after successful writes:
+BusinessProfileCreated
 
-| Event | When |
-|-------|------|
-| `business_profile.created` | Profile created with organization |
-| `business_profile.updated` | Profile fields updated |
-| `business_profile.setup_completed` | `setup_completed_at` set |
+BusinessProfileUpdated
 
-See `02_Architecture/EVENT_SYSTEM.md`.
+BusinessProfileActivated
+
+BusinessProfileArchived
 
 ---
 
-# Logging
+# API
 
-Log:
+GET /api/v1/business-profile
 
-- Profile created
-- Profile updated (organization_id, changed fields)
-- Setup completed
-- Setup completion rejected (missing fields)
+POST /api/v1/business-profile
 
----
+PATCH /api/v1/business-profile
 
-# Tests
+DELETE /api/v1/business-profile
 
-Required coverage:
-
-- Factory for `business_profile`
-- Model validations
-- Unique `organization_id` constraint
-- GET returns profile for current org
-- PATCH updates allowed fields
-- PATCH denied for `staff` role
-- Cross-tenant access denied
-- Complete endpoint sets `setup_completed_at` when valid
-- Complete endpoint returns 422 when required fields missing
-- Setup status transitions (`not_started` → `in_progress` → `completed`)
+DELETE performs a soft delete.
 
 ---
 
-# Out of Scope (V1)
+# Response
 
-- Multiple locations per profile
-- Profile versioning / audit history
-- Public unauthenticated profile page
-- Logo upload flow (URL field only in V1; upload via Active Storage in a later task)
+Always follow API standards.
+
+{
+  "success": true,
+  "data": {}
+}
 
 ---
 
-# Related Docs
+# Security
 
-- [ORGANIZATIONS.md](ORGANIZATIONS.md) — parent entity
-- [BUSINESS_SETUP.md](BUSINESS_SETUP.md) — onboarding wizard flow and steps
-- [AUTHENTICATION.md](AUTHENTICATION.md) — `/api/v1/me` integration
-- [API.md](API.md) — global API conventions
-- [DATABASE.md](DATABASE.md) — schema index
-- [BUSINESS_TYPES.md](../01_Product/BUSINESS_TYPES.md) — supported business types
-- [BUSINESS_SETUP_UI.md](../04_Frontend/BUSINESS_SETUP_UI.md) — wizard UI
+Only authenticated users.
+
+Only Organization Members.
+
+Only Owner and Manager can update profile.
+
+Receptionists have read-only access.
+
+---
+
+# Out of Scope
+
+Business Setup Wizard
+
+Working Hours
+
+Services
+
+Staff
+
+Knowledge
+
+Channels
+
+These belong to later specifications.
